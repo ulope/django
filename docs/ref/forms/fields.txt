@@ -1083,6 +1083,16 @@ method::
             super(FooMultipleChoiceForm, self).__init__(*args, **kwargs)
             self.fields['foo_select'].queryset = ...
 
+Alternatively you can supply a callable expecting no arguments which returns
+a queryset when called::
+
+    class FooMultipleChoiceForm(forms.Form):
+        foo_select = forms.ModelMultipleChoiceField(
+            queryset=lambda: Author.objects.all())
+
+This form has the advantage that the queryset won't be instantiated until the
+choice values are needed.
+
 ``ModelChoiceField``
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -1103,9 +1113,9 @@ method::
 
     .. attribute:: queryset
 
-        A ``QuerySet`` of model objects from which the choices for the
-        field will be derived, and which will be used to validate the
-        user's selection.
+        Either a ``QuerySet`` of model objects or a callable that returns such
+        a queryset. The choices for the field will be derived from this
+        queryset, and will be used to validate the user's selection.
 
     ``ModelChoiceField`` also takes two optional arguments:
 
@@ -1200,9 +1210,9 @@ method::
 
     .. attribute:: queryset
 
-        A ``QuerySet`` of model objects from which the choices for the
-        field will be derived, and which will be used to validate the
-        user's selection.
+        Either a ``QuerySet`` of model objects or a callable that returns such
+        a queryset. The choices for the field will be derived from this
+        queryset, and will be used to validate the user's selection.
 
 Creating custom fields
 ----------------------
