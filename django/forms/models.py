@@ -1114,6 +1114,16 @@ class ModelChoiceIterator(object):
     def choice(self, obj):
         return (self.field.prepare_value(obj), self.field.label_from_instance(obj))
 
+    @property
+    def queryset(self):
+        if callable(self._queryset):
+            self._queryset = self._queryset()
+        return self._queryset
+
+    @queryset.setter
+    def queryset(self, queryset):
+        self._queryset = queryset
+
 
 class ModelChoiceField(ChoiceField):
     """A ChoiceField whose choices are a model QuerySet."""
