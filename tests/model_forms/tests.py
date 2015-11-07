@@ -556,6 +556,19 @@ class FieldOverridesByFormMetaForm(forms.ModelForm):
         }
 
 
+class CallRecorder(object):
+    """
+    Wrapper class for callables that records whether it has been called.
+    """
+    def __init__(self, callable):
+        self.callable = callable
+        self.called = False
+
+    def __call__(self, *args, **kwargs):
+        self.called = True
+        return self.callable(*args, **kwargs)
+
+
 class TestFieldOverridesByFormMeta(SimpleTestCase):
     def test_widget_overrides(self):
         form = FieldOverridesByFormMetaForm()
@@ -1507,6 +1520,17 @@ class ModelChoiceFieldTests(TestCase):
             (self.c2.pk, "category It's a test"),
             (self.c3.pk, 'category Third')])
 
+        # Check callables are accepted as queryset
+        recorder = CallRecorder(lambda: Category.objects.all())
+        f.queryset = recorder
+        self.assertEqual(recorder.called, False)
+        self.assertEqual(list(f.choices), [
+            ('', '---------'),
+            (self.c1.pk, 'category Entertainment'),
+            (self.c2.pk, "category It's a test"),
+            (self.c3.pk, 'category Third')])
+        self.assertEqual(recorder.called, True)
+
     def test_modelchoicefield_11183(self):
         """
         Regression test for ticket #11183.
@@ -1622,6 +1646,16 @@ class ModelMultipleChoiceFieldTests(TestCase):
             (self.c1.pk, 'multicategory Entertainment'),
             (self.c2.pk, "multicategory It's a test"),
             (self.c3.pk, 'multicategory Third')])
+
+        # Check callables are accepted as queryset
+        recorder = CallRecorder(lambda: Category.objects.all())
+        f.queryset = recorder
+        self.assertEqual(recorder.called, False)
+        self.assertEqual(list(f.choices), [
+            (self.c1.pk, 'multicategory Entertainment'),
+            (self.c2.pk, "multicategory It's a test"),
+            (self.c3.pk, 'multicategory Third')])
+        self.assertEqual(recorder.called, True)
 
     def test_model_multiple_choice_number_of_queries(self):
         """
